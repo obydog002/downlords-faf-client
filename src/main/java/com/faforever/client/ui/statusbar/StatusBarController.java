@@ -16,6 +16,7 @@ import javafx.beans.binding.Bindings;
 import javafx.concurrent.Worker;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.ProgressBar;
@@ -46,6 +47,7 @@ public class StatusBarController extends NodeController<Node> {
   public MenuButton fafConnectionButton;
   public MenuButton chatConnectionButton;
   public ProgressBar taskProgressBar;
+  public Button cancelTasks;
   public Pane taskPane;
   public Label taskProgressLabel;
   public Label versionLabel;
@@ -141,5 +143,9 @@ public class StatusBarController extends NodeController<Node> {
 
   public void onChatReconnectClicked() {
     chatService.reconnect();
+  }
+
+  public void onCancelTasks() {
+    taskService.stopAllTasks();
   }
 }

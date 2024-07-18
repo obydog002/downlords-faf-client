@@ -53,4 +53,9 @@ public class TaskService {
   public ObservableList<Worker<?>> getActiveWorkers() {
     return unmodifiableObservableList;
   }
+
+  public void stopAllTasks() {
+    activeTasks.forEach(worker -> worker.cancel());
+    activeTasks.clear();
+  }
 }
