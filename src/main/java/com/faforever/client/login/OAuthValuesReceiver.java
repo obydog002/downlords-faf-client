@@ -33,6 +33,8 @@ public class OAuthValuesReceiver {
 
   private static final Pattern CODE_PATTERN = Pattern.compile("code=([^ &]+)");
   private static final Pattern STATE_PATTERN = Pattern.compile("state=([^ &]+)");
+  private static final Pattern ERROR_PATTERN = Pattern.compile("error=([^ &]+)");
+  private static final Pattern ERROR_DESCRIPTION_PATTERN = Pattern.compile("error_description=([^ &]+)");
 
   private final PlatformService platformService;
   private final LoginService loginService;
@@ -89,6 +91,7 @@ public class OAuthValuesReceiver {
 
       // Do not try with resources as the socket needs to stay open.
       try {
+        checkForError(request);
         Values values = readValues(request, redirectUri);
         success = true;
         return values;
@@ -145,6 +148,18 @@ public class OAuthValuesReceiver {
       throw new IllegalStateException("Could not extract value with pattern '" + pattern + "' from: " + request);
     }
     return matcher.group(1);
+  }
+
+  private void checkForError(String request) {
+    Matcher matcher = ERROR_PATTERN.matcher(request);
+    if (matcher.find()) {
+      Matcher errorDescriptionMatcher = ERROR_DESCRIPTION_PATTERN.matcher(request);
+      if (errorDescriptionMatcher.find()) {
+        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "' and description: " + errorDescriptionMatcher.group(1) + ". The full request is: " + request);
+      } else {
+        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "'. The full request is: " + request);
+      }
+    }
   }
 
   public record Values(String code, String state, URI redirectUri) {}
