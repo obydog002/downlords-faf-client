@@ -49,12 +49,16 @@ import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor
 public class LoginController extends NodeController<Pane> {
+
+  private static final Pattern ERROR_SCOPE_DENIED = Pattern.compile("scope_denied");
+  private static final Pattern ERROR_NO_CSRF = Pattern.compile("No\\+CSRF\\+value");
 
   private final OperatingSystem operatingSystem;
   private final GameRunner gameRunner;
@@ -279,6 +283,17 @@ public class LoginController extends NodeController<Pane> {
     return loginService.login(code, codeVerifier, redirectUri);
   }
 
+  private String getLoginErrorSpecificCause(Throwable throwable) {
+    String cause = throwable.getMessage();
+    if (ERROR_SCOPE_DENIED.matcher(cause).find()) {
+      return "login.scopeDenied";
+    }
+    if (ERROR_NO_CSRF.matcher(cause).find()) {
+      return "login.noCSRF";
+    }
+    return "login.failed";
+  }
+
   private Void onLoginFailed(Throwable throwable) {
     if (loginService.getOwnUser() != null && loginService.getOwnPlayer() != null) {
       log.info("Previous login request failed but user is already logged in", throwable);
@@ -294,7 +309,7 @@ public class LoginController extends NodeController<Pane> {
                                  List.of(new DismissAction(i18n))));
     } else {
       log.error("Could not log in", throwable);
-      notificationService.addImmediateErrorNotification(throwable, "login.failed");
+      notificationService.addImmediateErrorNotification(throwable, getLoginErrorSpecificCause(throwable));
     }
 
     showLoginForm();
