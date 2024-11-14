@@ -58,7 +58,7 @@ import java.util.regex.Pattern;
 public class LoginController extends NodeController<Pane> {
 
   private static final Pattern ERROR_SCOPE_DENIED = Pattern.compile("scope_denied");
-  private static final Pattern ERROR_NO_CSRF = Pattern.compile("No\\+CSRF\\+value");
+  private static final Pattern ERROR_NO_CSRF = Pattern.compile("No CSRF value");
 
   private final OperatingSystem operatingSystem;
   private final GameRunner gameRunner;

@@ -186,7 +186,7 @@ public class LoginControllerTest extends PlatformTest {
   @Test
   public void testLoginFailsNoCSRF() throws Exception {
     when(oAuthValuesReceiver.receiveValues(anyString(), anyString()))
-        .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("No+CSRF+value")));
+        .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("No CSRF value")));
 
     instance.onLoginButtonClicked();
     WaitForAsyncUtils.waitForFxEvents();

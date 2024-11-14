@@ -19,6 +19,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -151,13 +152,15 @@ public class OAuthValuesReceiver {
   }
 
   private void checkForError(String request) {
+    String decodedRequest = URLDecoder.decode(request, StandardCharsets.UTF_8);
     Matcher matcher = ERROR_PATTERN.matcher(request);
     if (matcher.find()) {
       Matcher errorDescriptionMatcher = ERROR_DESCRIPTION_PATTERN.matcher(request);
       if (errorDescriptionMatcher.find()) {
-        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "' and description: " + errorDescriptionMatcher.group(1) + ". The full request is: " + request);
+        String decodedDescription = URLDecoder.decode(errorDescriptionMatcher.group(1), StandardCharsets.UTF_8);
+        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "' and description: " + decodedDescription + ". The full request is: " + decodedRequest);
       } else {
-        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "'. The full request is: " + request);
+        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "'. The full request is: " + decodedRequest);
       }
     }
   }
