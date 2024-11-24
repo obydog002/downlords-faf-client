@@ -13,9 +13,6 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -58,19 +55,13 @@ public class WebViewConfigurer {
       themeService.registerWebView(webView);
 
       ((JSObject) engine.executeScript("window")).setMember(JAVA_REFERENCE_IN_JAVASCRIPT, browserCallback);
-
-      Document document = webView.getEngine().getDocument();
-      if (document == null) {
-        return;
-      }
-
-      NodeList nodeList = document.getElementsByTagName("a");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        Element link = (Element) nodeList.item(i);
-        String href = link.getAttribute("href");
-
-        link.setAttribute("href", "javascript:java.openUrl('" + href + "');");
-      }
+      engine.executeScript(
+        "document.onclick = function (elt) {" + 
+        "  document.querySelectorAll(\"a[target]\").forEach(e => {" + 
+        "    if (!e.href.includes(\"javascript\")) " + 
+        "      e.href = \"javascript:java.openUrl('\" + e.href + \"')\"" + 
+        "  });" +
+        "}");
     });
   }
 }
