@@ -160,7 +160,7 @@ public class LoginControllerTest extends PlatformTest {
   @Test
   public void testLoginFailsNoPorts() throws Exception {
     when(oAuthValuesReceiver.receiveValues(anyString(), anyString()))
-        .thenReturn(CompletableFuture.failedFuture(new IllegalStateException()));
+        .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("")));
 
     instance.onLoginButtonClicked();
     WaitForAsyncUtils.waitForFxEvents();
@@ -262,7 +262,7 @@ public class LoginControllerTest extends PlatformTest {
         .thenReturn(CompletableFuture.completedFuture(ClientConfigurationBuilder.create().defaultValues().get()));
     loginPrefs.setRememberMe(true);
     loginPrefs.setRefreshToken("abc");
-    when(loginService.loginWithRefreshToken()).thenReturn(Mono.error(new Exception()));
+    when(loginService.loginWithRefreshToken()).thenReturn(Mono.error(new Exception("")));
     runOnFxThreadAndWait(() -> reinitialize(instance));
     verify(loginService).loginWithRefreshToken();
     assertFalse(instance.loginProgressPane.isVisible());

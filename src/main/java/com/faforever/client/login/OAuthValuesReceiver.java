@@ -35,7 +35,6 @@ public class OAuthValuesReceiver {
   private static final Pattern CODE_PATTERN = Pattern.compile("code=([^ &]+)");
   private static final Pattern STATE_PATTERN = Pattern.compile("state=([^ &]+)");
   private static final Pattern ERROR_PATTERN = Pattern.compile("error=([^ &]+)");
-  private static final Pattern ERROR_DESCRIPTION_PATTERN = Pattern.compile("error_description=([^ &]+)");
 
   private final PlatformService platformService;
   private final LoginService loginService;
@@ -143,25 +142,22 @@ public class OAuthValuesReceiver {
     return new Values(code, state, redirectUri);
   }
 
+  private String formatRequest(String request) {
+    return URLDecoder.decode(request, StandardCharsets.UTF_8);
+  }
+
   private String extractValue(String request, Pattern pattern) {
     Matcher matcher = pattern.matcher(request);
     if (!matcher.find()) {
-      throw new IllegalStateException("Could not extract value with pattern '" + pattern + "' from: " + request);
+      throw new IllegalStateException("Could not extract value with pattern '" + pattern + "' from: " + formatRequest(request));
     }
     return matcher.group(1);
   }
 
   private void checkForError(String request) {
-    String decodedRequest = URLDecoder.decode(request, StandardCharsets.UTF_8);
     Matcher matcher = ERROR_PATTERN.matcher(request);
     if (matcher.find()) {
-      Matcher errorDescriptionMatcher = ERROR_DESCRIPTION_PATTERN.matcher(request);
-      if (errorDescriptionMatcher.find()) {
-        String decodedDescription = URLDecoder.decode(errorDescriptionMatcher.group(1), StandardCharsets.UTF_8);
-        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "' and description: " + decodedDescription + ". The full request is: " + decodedRequest);
-      } else {
-        throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "'. The full request is: " + decodedRequest);
-      }
+      throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "'. The full request is: " + formatRequest(request));
     }
   }
 

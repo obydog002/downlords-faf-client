@@ -285,9 +285,6 @@ public class LoginController extends NodeController<Pane> {
 
   private String getLoginErrorSpecificCause(Throwable throwable) {
     String cause = throwable.getMessage();
-    if (cause == null) {
-      cause = "";
-    }
     if (ERROR_SCOPE_DENIED.matcher(cause).find()) {
       return "login.scopeDenied";
     }
