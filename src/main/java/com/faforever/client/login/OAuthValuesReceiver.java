@@ -35,6 +35,8 @@ public class OAuthValuesReceiver {
   private static final Pattern CODE_PATTERN = Pattern.compile("code=([^ &]+)");
   private static final Pattern STATE_PATTERN = Pattern.compile("state=([^ &]+)");
   private static final Pattern ERROR_PATTERN = Pattern.compile("error=([^ &]+)");
+  private static final Pattern ERROR_SCOPE_DENIED = Pattern.compile("scope_denied");
+  private static final Pattern ERROR_NO_CSRF = Pattern.compile("No\\+CSRF\\+value");
 
   private final PlatformService platformService;
   private final LoginService loginService;
@@ -157,7 +159,15 @@ public class OAuthValuesReceiver {
   private void checkForError(String request) {
     Matcher matcher = ERROR_PATTERN.matcher(request);
     if (matcher.find()) {
-      throw new IllegalStateException("Login failed with error '" + matcher.group(1) + "'. The full request is: " + formatRequest(request));
+      String errorMessage = "Login failed with error '" + matcher.group(1) + "'. The full request is: " + formatRequest(request);
+      if (ERROR_SCOPE_DENIED.matcher(request).find()) {
+        throw new KnownLoginErrorException(errorMessage, "login.scopeDenied");
+      }
+
+      if (ERROR_NO_CSRF.matcher(request).find()) {
+        throw new KnownLoginErrorException(errorMessage, "login.noCSRF");
+      }
+      throw new IllegalStateException(errorMessage);
     }
   }
 

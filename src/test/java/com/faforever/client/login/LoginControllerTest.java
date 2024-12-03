@@ -171,27 +171,14 @@ public class LoginControllerTest extends PlatformTest {
   }
 
   @Test
-  public void testLoginFailsScopeDenied() throws Exception {
+  public void testLoginFailsKnownError() throws Exception {
     when(oAuthValuesReceiver.receiveValues(anyString(), anyString()))
-        .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("scope_denied")));
+        .thenReturn(CompletableFuture.failedFuture(new KnownLoginErrorException("", "login.known")));
 
     instance.onLoginButtonClicked();
     WaitForAsyncUtils.waitForFxEvents();
 
-    verify(notificationService).addImmediateErrorNotification(any(), eq("login.scopeDenied"));
-    assertFalse(instance.loginProgressPane.isVisible());
-    assertTrue(instance.loginFormPane.isVisible());
-  }
-
-  @Test
-  public void testLoginFailsNoCSRF() throws Exception {
-    when(oAuthValuesReceiver.receiveValues(anyString(), anyString()))
-        .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("No CSRF value")));
-
-    instance.onLoginButtonClicked();
-    WaitForAsyncUtils.waitForFxEvents();
-
-    verify(notificationService).addImmediateErrorNotification(any(), eq("login.noCSRF"));
+    verify(notificationService).addImmediateErrorNotification(any(), eq("login.known"));
     assertFalse(instance.loginProgressPane.isVisible());
     assertTrue(instance.loginFormPane.isVisible());
   }
