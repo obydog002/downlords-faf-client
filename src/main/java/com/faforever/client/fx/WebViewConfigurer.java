@@ -69,7 +69,7 @@ public class WebViewConfigurer {
             const links = [];
             for (const node of addedNodes) {
               if (node?.querySelectorAll) {
-                links.push(...Array.from(document.querySelectorAll("a")));
+                links.push(...document.querySelectorAll("a"));
               }
             }
             for (const elt of links) {
