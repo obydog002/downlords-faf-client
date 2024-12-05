@@ -63,13 +63,6 @@ public class WebViewConfigurer {
         return;
       }
 
-      NodeList nodeList = document.getElementsByTagName("a");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        Element link = (Element) nodeList.item(i);
-        String href = link.getAttribute("href");
-        link.setAttribute("href", "javascript:java.openUrl('" + href + "');");
-      }
-
       engine.executeScript("""
           let obs = new MutationObserver((mutations, observer) => {
             const addedNodes = mutations.flatMap(mut => Array.from(mut.addedNodes));
@@ -87,6 +80,15 @@ public class WebViewConfigurer {
           });
           obs.observe(document.body, {subtree:true, childList:true});
           """);
+
+      NodeList nodeList = document.getElementsByTagName("a");
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        Element link = (Element) nodeList.item(i);
+        String href = link.getAttribute("href");
+        if (!href.contains("javascript:java.openUrl")) {
+          link.setAttribute("href", "javascript:java.openUrl('" + href + "');");
+        }
+      }
     });
   }
 }
